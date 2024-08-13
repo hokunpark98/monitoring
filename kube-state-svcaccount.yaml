@@ -1,7 +1,0 @@
-# kube-state-svcaccount.yaml
-
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: kube-state-metrics
-  namespace: kube-system

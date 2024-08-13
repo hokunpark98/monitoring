@@ -103,10 +103,10 @@ data:
       istio:
         root_namespace: istio-system
       prometheus:
-        url: http://10.109.129.191:8080
+        url: http://10.102.79.69:8080
       external_services:
       grafana:
-        url: "http://10.106.205.181:3000"
+        url: "http://10.110.222.135:3000"
 
     identity:
       cert_file: ""
