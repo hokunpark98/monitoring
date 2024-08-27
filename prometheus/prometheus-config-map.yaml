@@ -30,6 +30,8 @@ data:
           severity: fatal
         annotations:
           summary: High Cpu Usage
+
+
   prometheus.yml: |-
     global:
       scrape_interval: 10s
@@ -77,15 +79,10 @@ data:
           target_label: __metrics_path__
           replacement: /api/v1/nodes/${1}/proxy/metrics
 
-      - job_name: 'cilium'
-          scrape_interval: 10s
-          static_configs:
-            - targets: ['192.169.0.79:9090', '192.169.0.10:9090', '192.169.0.32:9090', '192.169.0.5:9090']
-
-            
+   
       - job_name: 'node-info'
         static_configs:
-        - targets: ['192.168.0.79:9100', '192.168.0.37:9100', '192.168.0.10:9100', '192.168.0.32:9100', '192.168.0.5']
+        - targets: ['192.168.0.79:9100', '192.168.0.37:9100', '192.168.0.10:9100', '192.168.0.32:9100', '192.168.0.5','192.169.0.3']
         metric_relabel_configs:
         - source_labels: ['instance']
           regex: ^(.*):\d+$
@@ -127,6 +124,7 @@ data:
             - 192.168.0.10
             - 192.168.0.32
             - 192.168.0.5
+            - 192.168.0.3
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -149,7 +147,11 @@ data:
           - source_labels: [__param_target]
             regex: 192.168.0.5
             replacement: worker4
-            target_label: instance            
+            target_label: instance  
+          - source_labels: [__param_target]
+            regex: 192.168.0.3
+            replacement: worker5
+            target_label: instance                       
           - target_label: job
             replacement: worker1
 
@@ -163,6 +165,7 @@ data:
             - 192.168.0.10
             - 192.168.0.32
             - 192.168.0.5
+            - 192.168.0.3
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -185,7 +188,11 @@ data:
           - source_labels: [__param_target]
             regex: 192.168.0.5
             replacement: worker4
-            target_label: instance            
+            target_label: instance  
+          - source_labels: [__param_target]
+            regex: 192.168.0.3
+            replacement: worker5
+            target_label: instance                       
           - target_label: job
             replacement: worker2
 
@@ -199,6 +206,7 @@ data:
             - 192.168.0.10
             - 192.168.0.32
             - 192.168.0.5
+            - 192.168.0.3
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -221,7 +229,11 @@ data:
           - source_labels: [__param_target]
             regex: 192.168.0.5
             replacement: worker4
-            target_label: instance            
+            target_label: instance  
+          - source_labels: [__param_target]
+            regex: 192.168.0.3
+            replacement: worker5
+            target_label: instance                         
           - target_label: job
             replacement: worker3
 
@@ -236,6 +248,7 @@ data:
             - 192.168.0.10
             - 192.168.0.32
             - 192.168.0.5
+            - 192.168.0.3
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -258,9 +271,54 @@ data:
           - source_labels: [__param_target]
             regex: 192.168.0.5
             replacement: worker4
-            target_label: instance            
+            target_label: instance   
+          - source_labels: [__param_target]
+            regex: 192.168.0.3
+            replacement: worker5
+            target_label: instance                        
           - target_label: job
             replacement: worker4
+
+      - job_name: 'blackbox-worker5'
+        metrics_path: /probe
+        params:
+          module: [icmp]
+        static_configs:
+          - targets:
+            - 192.168.0.37
+            - 192.168.0.10
+            - 192.168.0.32
+            - 192.168.0.5
+            - 192.168.0.3
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter-worker4.monitoring.svc.cluster.local:9115
+          - source_labels: [__param_target]
+            regex: 192.168.0.37
+            replacement: worker1
+            target_label: instance
+          - source_labels: [__param_target]
+            regex: 192.168.0.10
+            replacement: worker2
+            target_label: instance
+          - source_labels: [__param_target]
+            regex: 192.168.0.32
+            replacement: worker3
+            target_label: instance
+          - source_labels: [__param_target]
+            regex: 192.168.0.5
+            replacement: worker4
+            target_label: instance   
+          - source_labels: [__param_target]
+            regex: 192.168.0.3
+            replacement: worker5
+            target_label: instance                        
+          - target_label: job
+            replacement: worker5
 
 
 

@@ -30,6 +30,8 @@ data:
           severity: fatal
         annotations:
           summary: High Cpu Usage
+
+          
   prometheus.yml: |-
     global:
       scrape_interval: 10s
