@@ -15,12 +15,17 @@ spec:
       labels:
         app: prometheus-server
     spec:
+      tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"    
       containers:
         - name: prometheus
           image: prom/prometheus:latest
           args:
             - "--config.file=/etc/prometheus/prometheus.yml"
             - "--storage.tsdb.path=/prometheus/"
+            - "--storage.tsdb.retention.time=6h"  # 데이터 유지 기간을 3시간으로 설정
           ports:
             - containerPort: 9090
           volumeMounts:

@@ -15,7 +15,7 @@ spec:
         app: grafana
     spec:
       nodeSelector:
-        kubernetes.io/hostname: worker5  # worker5에서 실행되도록 설정
+        kubernetes.io/hostname: worker1  # worker5에서 실행되도록 설정
       containers:
       - name: grafana
         image: grafana/grafana:latest

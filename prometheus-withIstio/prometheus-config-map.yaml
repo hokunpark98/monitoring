@@ -34,8 +34,8 @@ data:
 
   prometheus.yml: |-
     global:
-      scrape_interval: 10s
-      evaluation_interval: 10s
+      scrape_interval: 5s
+      evaluation_interval: 5s
     rule_files:
       - /etc/prometheus/prometheus.rules
     alerting:
@@ -82,12 +82,41 @@ data:
    
       - job_name: 'node-info'
         static_configs:
-        - targets: ['192.168.0.79:9100', '192.168.0.37:9100', '192.168.0.10:9100', '192.168.0.32:9100', '192.168.0.5','192.169.0.3']
+        - targets: ['192.168.0.10:9100', '192.168.0.11:9100', '192.168.0.12:9100', '192.168.0.13:9100', '192.168.0.14:9100']
         metric_relabel_configs:
         - source_labels: ['instance']
           regex: ^(.*):\d+$
           replacement: '$1'
           target_label: 'nodeIP'  
+
+      - job_name: 'kubernetes-cadvisor'
+        scrape_interval: 5s  # 5초마다 수집하도록 설정
+        scheme: https
+
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+        kubernetes_sd_configs:
+        - role: node
+
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+        - target_label: __address__
+          replacement: kubernetes.default.svc:443
+        - source_labels: [__meta_kubernetes_node_name]
+          regex: (.+)
+          target_label: __metrics_path__
+          replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+
+      - job_name: 'istio-mesh'
+        metrics_path: /stats/prometheus
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotationpresent_prometheus_io_scrape]
+            action: keep
+            regex: true
 
 
       - job_name: 'istiod'
@@ -111,20 +140,16 @@ data:
           action: keep
           regex: '.*-envoy-prom'
 
-
-
-
       - job_name: 'blackbox-worker1'
         metrics_path: /probe
         params:
           module: [icmp]
         static_configs:
           - targets:
-            - 192.168.0.37
-            - 192.168.0.10
-            - 192.168.0.32
-            - 192.168.0.5
-            - 192.168.0.3
+            - 192.168.0.11
+            - 192.168.0.12
+            - 192.168.0.13
+            - 192.168.0.14
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -133,25 +158,21 @@ data:
           - target_label: __address__
             replacement: blackbox-exporter-worker1.monitoring.svc.cluster.local:9115
           - source_labels: [__param_target]
-            regex: 192.168.0.37
+            regex: 192.168.0.11
             replacement: worker1
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.10
+            regex: 192.168.0.12
             replacement: worker2
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.32
+            regex: 192.168.0.13
             replacement: worker3
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.5
+            regex: 192.168.0.14
             replacement: worker4
-            target_label: instance  
-          - source_labels: [__param_target]
-            regex: 192.168.0.3
-            replacement: worker5
-            target_label: instance                       
+            target_label: instance                        
           - target_label: job
             replacement: worker1
 
@@ -161,11 +182,10 @@ data:
           module: [icmp]
         static_configs:
           - targets:
-            - 192.168.0.37
-            - 192.168.0.10
-            - 192.168.0.32
-            - 192.168.0.5
-            - 192.168.0.3
+            - 192.168.0.11
+            - 192.168.0.12
+            - 192.168.0.13
+            - 192.168.0.14
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -174,25 +194,21 @@ data:
           - target_label: __address__
             replacement: blackbox-exporter-worker2.monitoring.svc.cluster.local:9115
           - source_labels: [__param_target]
-            regex: 192.168.0.37
+            regex: 192.168.0.11
             replacement: worker1
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.10
+            regex: 192.168.0.12
             replacement: worker2
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.32
+            regex: 192.168.0.13
             replacement: worker3
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.5
+            regex: 192.168.0.14
             replacement: worker4
-            target_label: instance  
-          - source_labels: [__param_target]
-            regex: 192.168.0.3
-            replacement: worker5
-            target_label: instance                       
+            target_label: instance                         
           - target_label: job
             replacement: worker2
 
@@ -202,11 +218,10 @@ data:
           module: [icmp]
         static_configs:
           - targets:
-            - 192.168.0.37
-            - 192.168.0.10
-            - 192.168.0.32
-            - 192.168.0.5
-            - 192.168.0.3
+            - 192.168.0.11
+            - 192.168.0.12
+            - 192.168.0.13
+            - 192.168.0.14
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -215,25 +230,21 @@ data:
           - target_label: __address__
             replacement: blackbox-exporter-worker3.monitoring.svc.cluster.local:9115
           - source_labels: [__param_target]
-            regex: 192.168.0.37
+            regex: 192.168.0.11
             replacement: worker1
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.10
+            regex: 192.168.0.12
             replacement: worker2
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.32
+            regex: 192.168.0.13
             replacement: worker3
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.5
+            regex: 192.168.0.14
             replacement: worker4
-            target_label: instance  
-          - source_labels: [__param_target]
-            regex: 192.168.0.3
-            replacement: worker5
-            target_label: instance                         
+            target_label: instance                           
           - target_label: job
             replacement: worker3
 
@@ -244,11 +255,10 @@ data:
           module: [icmp]
         static_configs:
           - targets:
-            - 192.168.0.37
-            - 192.168.0.10
-            - 192.168.0.32
-            - 192.168.0.5
-            - 192.168.0.3
+            - 192.168.0.11
+            - 192.168.0.12
+            - 192.168.0.13
+            - 192.168.0.14
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -257,70 +267,23 @@ data:
           - target_label: __address__
             replacement: blackbox-exporter-worker4.monitoring.svc.cluster.local:9115
           - source_labels: [__param_target]
-            regex: 192.168.0.37
+            regex: 192.168.0.11
             replacement: worker1
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.10
+            regex: 192.168.0.12
             replacement: worker2
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.32
+            regex: 192.168.0.13
             replacement: worker3
             target_label: instance
           - source_labels: [__param_target]
-            regex: 192.168.0.5
+            regex: 192.168.0.14
             replacement: worker4
-            target_label: instance   
-          - source_labels: [__param_target]
-            regex: 192.168.0.3
-            replacement: worker5
-            target_label: instance                        
+            target_label: instance                          
           - target_label: job
             replacement: worker4
-
-      - job_name: 'blackbox-worker5'
-        metrics_path: /probe
-        params:
-          module: [icmp]
-        static_configs:
-          - targets:
-            - 192.168.0.37
-            - 192.168.0.10
-            - 192.168.0.32
-            - 192.168.0.5
-            - 192.168.0.3
-        relabel_configs:
-          - source_labels: [__address__]
-            target_label: __param_target
-          - source_labels: [__param_target]
-            target_label: instance
-          - target_label: __address__
-            replacement: blackbox-exporter-worker4.monitoring.svc.cluster.local:9115
-          - source_labels: [__param_target]
-            regex: 192.168.0.37
-            replacement: worker1
-            target_label: instance
-          - source_labels: [__param_target]
-            regex: 192.168.0.10
-            replacement: worker2
-            target_label: instance
-          - source_labels: [__param_target]
-            regex: 192.168.0.32
-            replacement: worker3
-            target_label: instance
-          - source_labels: [__param_target]
-            regex: 192.168.0.5
-            replacement: worker4
-            target_label: instance   
-          - source_labels: [__param_target]
-            regex: 192.168.0.3
-            replacement: worker5
-            target_label: instance                        
-          - target_label: job
-            replacement: worker5
-
-
 
 
 
@@ -353,26 +316,6 @@ data:
         static_configs:
           - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
 
-      - job_name: 'kubernetes-cadvisor'
-
-        scheme: https
-
-        tls_config:
-          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-
-        kubernetes_sd_configs:
-        - role: node
-
-        relabel_configs:
-        - action: labelmap
-          regex: __meta_kubernetes_node_label_(.+)
-        - target_label: __address__
-          replacement: kubernetes.default.svc:443
-        - source_labels: [__meta_kubernetes_node_name]
-          regex: (.+)
-          target_label: __metrics_path__
-          replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
 
       - job_name: 'kubernetes-service-endpoints'
 
