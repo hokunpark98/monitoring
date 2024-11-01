@@ -82,7 +82,7 @@ data:
    
       - job_name: 'node-info'
         static_configs:
-        - targets: ['192.168.0.10:9100', '192.168.0.11:9100', '192.168.0.12:9100', '192.168.0.13:9100', '192.168.0.14:9100']
+        - targets: ['192.168.0.10:9100', '192.168.0.11:9100', '192.168.0.12:9100', '192.168.0.13:9100', '192.168.0.14:9100', '192.168.0.15:9100']
         metric_relabel_configs:
         - source_labels: ['instance']
           regex: ^(.*):\d+$
@@ -150,6 +150,7 @@ data:
             - 192.168.0.12
             - 192.168.0.13
             - 192.168.0.14
+            - 192.168.0.15
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -172,7 +173,11 @@ data:
           - source_labels: [__param_target]
             regex: 192.168.0.14
             replacement: worker4
-            target_label: instance                        
+            target_label: instance        
+          - source_labels: [__param_target]
+            regex: 192.168.0.15
+            replacement: worker5
+            target_label: instance                              
           - target_label: job
             replacement: worker1
 
@@ -186,6 +191,7 @@ data:
             - 192.168.0.12
             - 192.168.0.13
             - 192.168.0.14
+            - 192.168.0.15            
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -208,7 +214,11 @@ data:
           - source_labels: [__param_target]
             regex: 192.168.0.14
             replacement: worker4
-            target_label: instance                         
+            target_label: instance    
+          - source_labels: [__param_target]
+            regex: 192.168.0.15
+            replacement: worker5
+            target_label: instance                                    
           - target_label: job
             replacement: worker2
 
@@ -222,6 +232,7 @@ data:
             - 192.168.0.12
             - 192.168.0.13
             - 192.168.0.14
+            - 192.168.0.15            
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -244,7 +255,11 @@ data:
           - source_labels: [__param_target]
             regex: 192.168.0.14
             replacement: worker4
-            target_label: instance                           
+            target_label: instance   
+          - source_labels: [__param_target]
+            regex: 192.168.0.15
+            replacement: worker5
+            target_label: instance                                      
           - target_label: job
             replacement: worker3
 
@@ -259,6 +274,7 @@ data:
             - 192.168.0.12
             - 192.168.0.13
             - 192.168.0.14
+            - 192.168.0.15            
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -281,9 +297,54 @@ data:
           - source_labels: [__param_target]
             regex: 192.168.0.14
             replacement: worker4
-            target_label: instance                          
+            target_label: instance  
+          - source_labels: [__param_target]
+            regex: 192.168.0.15
+            replacement: worker5
+            target_label: instance                                     
           - target_label: job
             replacement: worker4
+
+      - job_name: 'blackbox-worker5'
+        metrics_path: /probe
+        params:
+          module: [icmp]
+        static_configs:
+          - targets:
+            - 192.168.0.11
+            - 192.168.0.12
+            - 192.168.0.13
+            - 192.168.0.14
+            - 192.168.0.15            
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter-worker4.monitoring.svc.cluster.local:9115
+          - source_labels: [__param_target]
+            regex: 192.168.0.11
+            replacement: worker1
+            target_label: instance
+          - source_labels: [__param_target]
+            regex: 192.168.0.12
+            replacement: worker2
+            target_label: instance
+          - source_labels: [__param_target]
+            regex: 192.168.0.13
+            replacement: worker3
+            target_label: instance
+          - source_labels: [__param_target]
+            regex: 192.168.0.14
+            replacement: worker4
+            target_label: instance  
+          - source_labels: [__param_target]
+            regex: 192.168.0.15
+            replacement: worker5
+            target_label: instance                                     
+          - target_label: job
+            replacement: worker5
 
 
 
